@@ -53,23 +53,45 @@ public class CSVDataDao {
         MapSolrParams queryParams = new MapSolrParams(queryParamMap);
         QueryResponse response = this.client.query(core, queryParams);
 
-//        SolrDocumentList documents = response.getResults();
-//        Iterator var6 = documents.iterator();
-//
-//        while (var6.hasNext()) {
-//            SolrDocument a = (SolrDocument) var6.next();
-//            CSVData dataObject = new CSVData();
-//            dataObject.setApp_id(a.getFieldValue("app_id").toString());
-//            dataObject.setSms(a.getFieldValue("sms").toString());
-//            dataObject.setDatetime(a.getFieldValue("datetime").toString());
-//            dataObject.setId(a.getFieldValue("id").toString());
-//            dataObject.set_version_(a.getFieldValue("_version_").toString());
-//            dataObject.setTimestamp(a.getFieldValue("timestamp").toString());
-//            result.add(dataObject);
-//        }
-
         return response;
     }
+
+    public QueryResponse readerDismax(String q, String fl, String fq, String start, String rows, String df, String sort, String debugQuery, String mm, String core) throws IOException, SolrServerException {
+        ArrayList<CSVData> result = new ArrayList();
+        Map<String, String> queryParamMap = new HashMap();
+        queryParamMap.put("defType", "dismax");
+        if (!q.equals("")) {
+            queryParamMap.put("q", q);
+        }
+        if (!fl.equals("")) {
+            queryParamMap.put("fl", fl);
+        }
+        if (!mm.equals("")) {
+            queryParamMap.put("mm", mm);
+        }
+        if (!fq.equals("")) {
+            queryParamMap.put("fq", fq);
+        }
+        if (!rows.equals("")) {
+            queryParamMap.put("rows", rows);
+        }
+        if (!start.equals("")) {
+            queryParamMap.put("start", start);
+        }
+        if (!df.equals("")) {
+            queryParamMap.put("df", df);
+        }
+        if (!sort.equals("")) {
+            queryParamMap.put("sort", sort);
+        }
+        if (!debugQuery.equals("")) {
+            queryParamMap.put("debugQuery", debugQuery);
+        }
+        MapSolrParams queryParams = new MapSolrParams(queryParamMap);
+        QueryResponse response = this.client.query(core, queryParams);
+        return response;
+    }
+
 
     public void indexList(ArrayList<CSVData> csvDataArrayList, String core) throws IOException, SolrServerException {
         ArrayList<SolrInputDocument> solrInputDocuments = new ArrayList();
