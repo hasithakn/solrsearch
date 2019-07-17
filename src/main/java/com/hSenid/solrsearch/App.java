@@ -19,24 +19,25 @@ public class App {
     public static SearchLogics searchLogics = new SearchLogics();
     public static SearchDuplicates searchDuplicates = new SearchDuplicates();
     public static final String CORE = "experimentCore";
-    public static String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-02T00:00:00Z]";
-    public static String dateRangeToSearchINDup = "datetime:[2019-02-22T00:00:00Z TO 2019-03-01T00:00:00Z]";
-    public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<String, Long[]>();
+    public static String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T01:00:00Z]";
+    public static String dateRangeToSearchINDup = "datetime:[2019-02-21T00:00:00Z TO 2019-02-28T00:00:00Z]";
+    public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<>();
 
     public static void main(String[] args) {
 
         int start = 0;
-        int batch = 500;
-        String q = "sms:*";
+        final int batch = 200;
+        final String q = "sms:*";
+
         SolrDocumentList results = executeQ(start, dateRangeToSearchFormDup, q, batch);
         long numFound = results.getNumFound();
-
+        long noOfTimes = numFound / batch;
         if (results != null) {
             processData(results);
         }
 
         if (numFound > batch) {
-            for (int i = 0; i < (numFound / batch); i++) {
+            for (int i = 0; i < noOfTimes; i++) {
                 start += batch;
                 SolrDocumentList results1 = executeQ(start, dateRangeToSearchFormDup, q, batch);
                 if (results1 != null) {
@@ -44,7 +45,7 @@ public class App {
                 }
             }
         }
-        System.out.println(c);
+
         //todo store details in db
 
     }
@@ -72,13 +73,16 @@ public class App {
         Iterator iterator = results.iterator();
         while (iterator.hasNext()) {
             SolrDocument a = (SolrDocument) iterator.next();
+//            synchronized (App.class) {
             c++;
             Long[] longs = searchDuplicates.searchForDuplicates(a, dateRangeToSearchINDup, CORE, searchLogics);
             appIDvsDupMap.put(a.getFieldValue("app_id").toString(), longs);
             System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
             System.out.print(longs[1] + " ");
             System.out.print(longs[2] + " ");
-            System.out.println(longs[3] + " ");
+            System.out.println(longs[3] + " " + Thread.currentThread().getName());
+//            }
+
         }
     }
 

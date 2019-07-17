@@ -12,7 +12,7 @@ public class SOLRDBConnecter {
 
     public static SolrClient getSolrClient() {
         if (solr == null) {
-            solr = ((Builder)((Builder)(new Builder("http://localhost:8983/solr/")).withConnectionTimeout(10000)).withSocketTimeout(60000)).build();
+            solr = ((Builder)((Builder)(new Builder("http://localhost:8983/solr/")).withConnectionTimeout(10000)).withSocketTimeout(30000)).build();
         }
 
         return solr;
