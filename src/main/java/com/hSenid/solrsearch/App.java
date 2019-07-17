@@ -8,6 +8,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -19,31 +20,47 @@ public class App {
     public static SearchLogics searchLogics = new SearchLogics();
     public static SearchDuplicates searchDuplicates = new SearchDuplicates();
     public static final String CORE = "experimentCore";
-    public static String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T01:00:00Z]";
+    public static String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T12:00:00Z]";
     public static String dateRangeToSearchINDup = "datetime:[2019-02-21T00:00:00Z TO 2019-02-28T00:00:00Z]";
     public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<>();
 
     public static void main(String[] args) {
 
         int start = 0;
-        final int batch = 200;
+        final int batch = 10000;
         final String q = "sms:*";
 
         SolrDocumentList results = executeQ(start, dateRangeToSearchFormDup, q, batch);
         long numFound = results.getNumFound();
-        long noOfTimes = numFound / batch;
-        if (results != null) {
-            processData(results);
-        }
+        int noOfTimes = (int) (numFound / batch);
+//        if (results != null) {
+//            processData(results);
+//        }
 
+        final SolrDocumentList[] solrDocumentLists = new SolrDocumentList[noOfTimes + 1];
+        Thread[] ts = new Thread[noOfTimes + 1];
+
+        solrDocumentLists[0] = results;
         if (numFound > batch) {
             for (int i = 0; i < noOfTimes; i++) {
                 start += batch;
-                SolrDocumentList results1 = executeQ(start, dateRangeToSearchFormDup, q, batch);
+                final SolrDocumentList results1 = executeQ(start, dateRangeToSearchFormDup, q, batch);
                 if (results1 != null) {
-                    processData(results1);
+                    solrDocumentLists[i + 1] = results1;
                 }
             }
+        }
+
+        for (int i = 0; i < noOfTimes + 1; i++) {
+            final int temp = i;
+            ts[i] = new Thread() {
+                public void run() {
+                    processData(solrDocumentLists[temp]);
+                }
+            };
+        }
+        for (int i = 0; i < noOfTimes + 1; i++) {
+            ts[i].start();
         }
 
         //todo store details in db
@@ -59,7 +76,7 @@ public class App {
                     start,
                     batch,
                     CORE);
-            System.out.println("executed for 100 from " + start);
+            System.out.println("executed for " + batch + " from " + start);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SolrServerException e) {
@@ -76,12 +93,13 @@ public class App {
 //            synchronized (App.class) {
             c++;
             Long[] longs = searchDuplicates.searchForDuplicates(a, dateRangeToSearchINDup, CORE, searchLogics);
-            appIDvsDupMap.put(a.getFieldValue("app_id").toString(), longs);
             System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
             System.out.print(longs[1] + " ");
             System.out.print(longs[2] + " ");
             System.out.println(longs[3] + " " + Thread.currentThread().getName());
 //            }
+
+
 
         }
     }
