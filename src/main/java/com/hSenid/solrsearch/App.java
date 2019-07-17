@@ -1,5 +1,7 @@
 package com.hSenid.solrsearch;
 
+import com.hSenid.solrsearch.Dao.AnalysisDao;
+import com.hSenid.solrsearch.Entity.AnalysedData;
 import com.hSenid.solrsearch.Functions.SearchDuplicates;
 import com.hSenid.solrsearch.Functions.SearchLogics;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -19,9 +21,10 @@ public class App {
     public static int c = 0;
     public static SearchLogics searchLogics = new SearchLogics();
     public static SearchDuplicates searchDuplicates = new SearchDuplicates();
+    public static AnalysisDao analysisDao = new AnalysisDao();
     public static final String CORE = "experimentCore";
-    public static String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T12:00:00Z]";
-    public static String dateRangeToSearchINDup = "datetime:[2019-02-21T00:00:00Z TO 2019-02-28T00:00:00Z]";
+    public static final String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T23:59:59Z]";
+    public static final String dateRangeToSearchINDup = "datetime:[2019-02-14T00:00:00Z TO 2019-02-28T00:00:00Z]";
     public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<>();
 
     public static void main(String[] args) {
@@ -93,12 +96,20 @@ public class App {
 //            synchronized (App.class) {
             c++;
             Long[] longs = searchDuplicates.searchForDuplicates(a, dateRangeToSearchINDup, CORE, searchLogics);
-            System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
-            System.out.print(longs[1] + " ");
-            System.out.print(longs[2] + " ");
-            System.out.println(longs[3] + " " + Thread.currentThread().getName());
+            AnalysedData analysedData = new AnalysedData();
+            analysedData.setApp_id(a.getFieldValue("app_id").toString());
+            analysedData.setDoc_id(a.getFieldValue("id").toString());
+            analysedData.setD101((int) (long) longs[0]);
+            analysedData.setD102((int) (long) longs[1]);
+            analysedData.setD103((int) (long) longs[2]);
+            analysedData.setD104((int) (long) longs[3]);
+            analysisDao.set(analysedData, "analysis3");
+            analysedData = null;
+//            System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
+//            System.out.print(longs[1] + " ");
+//            System.out.print(longs[2] + " ");
+//            System.out.println(longs[3] + " " + Thread.currentThread().getName());
 //            }
-
 
 
         }
