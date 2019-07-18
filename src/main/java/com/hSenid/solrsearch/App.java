@@ -23,7 +23,7 @@ public class App {
     public static SearchDuplicates searchDuplicates = new SearchDuplicates();
     public static AnalysisDao analysisDao = new AnalysisDao();
     public static final String CORE = "experimentCore";
-    public static final String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T23:59:59Z]";
+    public static final String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-06T23:59:59Z]";
     public static final String dateRangeToSearchINDup = "datetime:[2019-02-14T00:00:00Z TO 2019-02-28T00:00:00Z]";
     public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<>();
 
@@ -103,7 +103,7 @@ public class App {
             analysedData.setD102((int) (long) longs[1]);
             analysedData.setD103((int) (long) longs[2]);
             analysedData.setD104((int) (long) longs[3]);
-            analysisDao.set(analysedData, "analysis3");
+            analysisDao.set(analysedData, "analysis5_1weekfor2weeks");
             analysedData = null;
 //            System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
 //            System.out.print(longs[1] + " ");
@@ -115,5 +115,8 @@ public class App {
         }
     }
 
+//    public static void main(String[] args) {
+//        System.out.println("hi");
+//    }
 
 }

@@ -8,13 +8,17 @@ import java.util.ArrayList;
 
 public class AnalysisDao {
     public static final Connection con = MYSQLConnecter.getConnection();
+
     public void set(AnalysedData analysedData, String tableName) {
 
         String query = " insert into " + tableName + " ( app_id, doc_id, D101, D102, D103, D104 ) "
                 + " values (?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement preparedStmt = null;
+
         try {
 
-            PreparedStatement preparedStmt = con.prepareStatement(query);
+            preparedStmt = con.prepareStatement(query);
             preparedStmt.setString(1, analysedData.getApp_id());
             preparedStmt.setString(2, analysedData.getDoc_id());
             preparedStmt.setInt(3, analysedData.getD101());
@@ -23,8 +27,18 @@ public class AnalysisDao {
             preparedStmt.setInt(6, analysedData.getD104());
 
             preparedStmt.execute();
+
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (preparedStmt != null) {
+                try {
+                    preparedStmt.close();
+                    con.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -40,8 +54,16 @@ public class AnalysisDao {
             ResultSet rs = statement.executeQuery();
             rs.next();
             rows = Integer.parseInt(rs.getObject("a").toString());
+            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                statement.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
