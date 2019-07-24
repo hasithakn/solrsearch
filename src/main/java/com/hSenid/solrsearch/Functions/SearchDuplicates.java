@@ -11,6 +11,10 @@ public class SearchDuplicates {
 
     public Long[] searchForDuplicates(SolrDocument a, String dateRangeToSearchINDup, String CORE, SearchLogics searchLogics) {
         Long[] longs = new Long[4];
+        //-1 for exception
+        //0 for not found
+        //>0 for matches
+
         long D101 = searchForDuplicatesD101(
                 a,
                 dateRangeToSearchINDup,
@@ -22,16 +26,22 @@ public class SearchDuplicates {
                     dateRangeToSearchINDup,
                     CORE,
                     searchLogics);
-
-            long[] D103andD104 = searchForDuplicatesD103andD104(
-                    a,
-                    dateRangeToSearchINDup,
-                    CORE,
-                    searchLogics);
-            longs[0] = D101;
-            longs[1] = D102;
-            longs[2] = D103andD104[0];
-            longs[3] = D103andD104[1];
+            if (D102 <= 0) {
+                long[] D103andD104 = searchForDuplicatesD103andD104(
+                        a,
+                        dateRangeToSearchINDup,
+                        CORE,
+                        searchLogics);
+                longs[0] = D101;
+                longs[1] = D102;
+                longs[2] = D103andD104[0];
+                longs[3] = D103andD104[1];
+            } else {
+                longs[0] = D101;
+                longs[1] = D102;
+                longs[2] = -1L;
+                longs[3] = -1L;
+            }
         } else {
             longs[0] = D101;
             longs[1] = -1L;
@@ -41,12 +51,12 @@ public class SearchDuplicates {
         return longs;
     }
 
-
     public long searchForDuplicatesD101(SolrDocument a, String dateRange, String core, SearchLogics searchLogics) {
 
         String sms = a.getFieldValue("sms").toString();
         String app_id = a.getFieldValue("app_id").toString();
         dateRange = dateRange + " AND app_id:" + app_id;
+        sms = sms.replaceAll("\"", "\\\\\"");
         String q = "\"" + sms + "\"";
         long numFound = -1;
         try {
@@ -71,7 +81,7 @@ public class SearchDuplicates {
 
     public long searchForDuplicatesD102(SolrDocument a, String dateRange, String core, SearchLogics searchLogics) {
         String sms = a.getFieldValue("sms").toString();
-        sms = sms.replaceAll(":", " ");
+        sms = sms.replaceAll("\"", "\\\\\"");
         String app_id = a.getFieldValue("app_id").toString();
         dateRange = dateRange + " AND app_id:" + app_id;
         String q = "\"" + sms + "\"";
@@ -103,6 +113,7 @@ public class SearchDuplicates {
         ret[1] = -1;
         String sms = a.getFieldValue("sms").toString();
         sms = sms.replaceAll(":", " ");
+        sms = sms.replaceAll("\"", " ");
         String app_id = a.getFieldValue("app_id").toString();
         dateRange = dateRange + " AND app_id:" + app_id;
         String q = "( " + sms + " )";
@@ -121,7 +132,13 @@ public class SearchDuplicates {
 
             if (numFoundD103 <= 0) {
                 String parsedquery_toString = searchDocs.getDebugMap().get("parsedquery_toString").toString();
-                int totTerms = getTotTerms(length, parsedquery_toString);
+                int totTerms = 0;
+                try {
+                    totTerms = getTotTerms(length, parsedquery_toString);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 long numFoundD104 = -1;
                 searchDocs = searchLogics.searchDateRangeDismax(q,
                         dateRange,
@@ -151,23 +168,28 @@ public class SearchDuplicates {
 
     private int getTotTerms(int length, String parsedquery_toString) {
         int totTerms = -1;
-        try {
-            int i = parsedquery_toString.indexOf("~", 0);
-            int j = parsedquery_toString.indexOf(")", i);
-            String terms = parsedquery_toString.substring(i + 1, j);
-            totTerms = Integer.parseInt(terms);
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
+        if (length > 1) {
+            try {
+                int i = parsedquery_toString.indexOf("~", 0);
+                int j = parsedquery_toString.indexOf(")", i);
+                String terms = parsedquery_toString.substring(i + 1, j);
+                totTerms = Integer.parseInt(terms);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                throw e;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return 0;
+            }
 
-        if (totTerms == -1) {
-            totTerms = length - 1;
+            if (totTerms == -1) {
+                totTerms = length - 1;
+            } else {
+                totTerms = totTerms - 1;
+            }
+            return totTerms;
         } else {
-            totTerms = totTerms - 1;
+            return 0;
         }
-        return totTerms;
     }
-
 }

@@ -34,7 +34,6 @@ public class AnalysisDao {
             if (preparedStmt != null) {
                 try {
                     preparedStmt.close();
-                    con.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

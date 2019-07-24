@@ -2,6 +2,7 @@ package com.hSenid.solrsearch;
 
 import com.hSenid.solrsearch.Dao.AnalysisDao;
 import com.hSenid.solrsearch.Entity.AnalysedData;
+import com.hSenid.solrsearch.FileIO.FileIO;
 import com.hSenid.solrsearch.Functions.SearchDuplicates;
 import com.hSenid.solrsearch.Functions.SearchLogics;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -9,37 +10,49 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Hello world!
  */
 public class App {
-    public static int c = 0;
-    public static SearchLogics searchLogics = new SearchLogics();
-    public static SearchDuplicates searchDuplicates = new SearchDuplicates();
-    public static AnalysisDao analysisDao = new AnalysisDao();
-    public static final String CORE = "experimentCore";
-    public static final String dateRangeToSearchFormDup = "datetime:[2019-03-01T00:00:00Z TO 2019-03-06T23:59:59Z]";
-    public static final String dateRangeToSearchINDup = "datetime:[2019-02-14T00:00:00Z TO 2019-02-28T00:00:00Z]";
-    public static HashMap<String, Long[]> appIDvsDupMap = new HashMap<>();
+
+    private static SearchLogics searchLogics = new SearchLogics();
+    private static SearchDuplicates searchDuplicates = new SearchDuplicates();
+    private static AnalysisDao analysisDao = new AnalysisDao();
+    private static final String CORE = "experiment2";
+    private static final String DB = "rerun7d1m";
+    private static final String DATE_RANGE_TO_SEARCH =
+            "datetime:[2019-03-01T00:00:00Z TO 2019-03-02T00:00:00Z]";
+    private static final String SEARCH_DUP_IN_THIS_RANGE =
+            "datetime:[2019-02-01T00:00:00Z TO 2019-02-28T00:00:00Z]";
+
+    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    private static ArrayList<String> appids = new ArrayList<>();
+
 
     public static void main(String[] args) {
+
+        try {
+            appids = FileIO.getAppids(APP_ID_PATH);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         int start = 0;
         final int batch = 10000;
         final String q = "sms:*";
 
-        SolrDocumentList results = executeQ(start, dateRangeToSearchFormDup, q, batch);
+        SolrDocumentList results = executeQ(start, DATE_RANGE_TO_SEARCH, q, batch);
         long numFound = results.getNumFound();
-        int noOfTimes = (int) (numFound / batch);
-//        if (results != null) {
-//            processData(results);
-//        }
 
+        int noOfTimes = (int) (numFound / batch);
         final SolrDocumentList[] solrDocumentLists = new SolrDocumentList[noOfTimes + 1];
         Thread[] ts = new Thread[noOfTimes + 1];
 
@@ -47,13 +60,13 @@ public class App {
         if (numFound > batch) {
             for (int i = 0; i < noOfTimes; i++) {
                 start += batch;
-                final SolrDocumentList results1 = executeQ(start, dateRangeToSearchFormDup, q, batch);
+                final SolrDocumentList results1 = executeQ(start, DATE_RANGE_TO_SEARCH, q, batch);
                 if (results1 != null) {
                     solrDocumentLists[i + 1] = results1;
                 }
             }
         }
-
+//
         for (int i = 0; i < noOfTimes + 1; i++) {
             final int temp = i;
             ts[i] = new Thread() {
@@ -62,15 +75,18 @@ public class App {
                 }
             };
         }
+
         for (int i = 0; i < noOfTimes + 1; i++) {
             ts[i].start();
         }
-
-        //todo store details in db
-
     }
 
-    private static SolrDocumentList executeQ(int start, String dateRangeAS_fq, String q, int batch) {
+    private static SolrDocumentList executeQ(
+            int start,
+            String dateRangeAS_fq,
+            String q,
+            int batch
+    ) {
         QueryResponse csv_core2 = null;
         try {
             csv_core2 = searchLogics.searchDateRange(q,
@@ -79,6 +95,7 @@ public class App {
                     start,
                     batch,
                     CORE);
+
             System.out.println("executed for " + batch + " from " + start);
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,33 +107,49 @@ public class App {
     }
 
     private static void processData(SolrDocumentList results) {
-        Iterator iterator = results.iterator();
-        while (iterator.hasNext()) {
-            SolrDocument a = (SolrDocument) iterator.next();
-//            synchronized (App.class) {
-            c++;
-            Long[] longs = searchDuplicates.searchForDuplicates(a, dateRangeToSearchINDup, CORE, searchLogics);
-            AnalysedData analysedData = new AnalysedData();
-            analysedData.setApp_id(a.getFieldValue("app_id").toString());
-            analysedData.setDoc_id(a.getFieldValue("id").toString());
-            analysedData.setD101((int) (long) longs[0]);
-            analysedData.setD102((int) (long) longs[1]);
-            analysedData.setD103((int) (long) longs[2]);
-            analysedData.setD104((int) (long) longs[3]);
-            analysisDao.set(analysedData, "analysis5_1weekfor2weeks");
-            analysedData = null;
-//            System.out.print(c + " " + a.getFieldValue("app_id").toString() + " : " + longs[0] + " ");
-//            System.out.print(longs[1] + " ");
-//            System.out.print(longs[2] + " ");
-//            System.out.println(longs[3] + " " + Thread.currentThread().getName());
-//            }
 
+        List<SolrDocument> filteredList = results.stream().parallel()
+                .filter(csvSolr -> appids.contains(csvSolr.getFieldValue("app_id").toString()))
+                .collect(Collectors.toList());
 
-        }
+        filteredList.stream().parallel()
+                .forEach(a -> {
+                    Long[] longs = searchDuplicates.searchForDuplicates(
+                            a,
+                            SEARCH_DUP_IN_THIS_RANGE,
+                            CORE,
+                            searchLogics
+                    );
+                    AnalysedData analysedData = new AnalysedData();
+                    analysedData.setApp_id(a.getFieldValue("app_id").toString());
+                    analysedData.setDoc_id(a.getFieldValue("id").toString());
+                    analysedData.setD101((int) (long) longs[0]);
+                    analysedData.setD102((int) (long) longs[1]);
+                    analysedData.setD103((int) (long) longs[2]);
+                    analysedData.setD104((int) (long) longs[3]);
+                    analysisDao.set(analysedData, DB);
+                });
+
+//        Iterator iterator = filteredList.iterator();
+//        while (iterator.hasNext()) {
+//            SolrDocument a = (SolrDocument) iterator.next();
+//            Long[] longs = searchDuplicates.searchForDuplicates(
+//                    a,
+//                    SEARCH_DUP_IN_THIS_RANGE,
+//                    CORE,
+//                    searchLogics
+//            );
+//
+//            AnalysedData analysedData = new AnalysedData();
+//            analysedData.setApp_id(a.getFieldValue("app_id").toString());
+//            analysedData.setDoc_id(a.getFieldValue("id").toString());
+//            analysedData.setD101((int) (long) longs[0]);
+//            analysedData.setD102((int) (long) longs[1]);
+//            analysedData.setD103((int) (long) longs[2]);
+//            analysedData.setD104((int) (long) longs[3]);
+////            analysisDao.set(analysedData, DB);
+//        }
+//
+//        System.out.println(System.currentTimeMillis() - l2);
     }
-
-//    public static void main(String[] args) {
-//        System.out.println("hi");
-//    }
-
 }
