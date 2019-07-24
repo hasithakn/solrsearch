@@ -13,9 +13,7 @@ import org.apache.solr.common.SolrDocumentList;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -130,26 +128,5 @@ public class App {
                     analysisDao.set(analysedData, DB);
                 });
 
-//        Iterator iterator = filteredList.iterator();
-//        while (iterator.hasNext()) {
-//            SolrDocument a = (SolrDocument) iterator.next();
-//            Long[] longs = searchDuplicates.searchForDuplicates(
-//                    a,
-//                    SEARCH_DUP_IN_THIS_RANGE,
-//                    CORE,
-//                    searchLogics
-//            );
-//
-//            AnalysedData analysedData = new AnalysedData();
-//            analysedData.setApp_id(a.getFieldValue("app_id").toString());
-//            analysedData.setDoc_id(a.getFieldValue("id").toString());
-//            analysedData.setD101((int) (long) longs[0]);
-//            analysedData.setD102((int) (long) longs[1]);
-//            analysedData.setD103((int) (long) longs[2]);
-//            analysedData.setD104((int) (long) longs[3]);
-////            analysisDao.set(analysedData, DB);
-//        }
-//
-//        System.out.println(System.currentTimeMillis() - l2);
     }
 }
