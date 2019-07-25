@@ -27,7 +27,7 @@ public class App {
     private static final String CORE = "experiment2";
     private static final String DB = "rerun7d1m";
     private static final String DATE_RANGE_TO_SEARCH =
-            "datetime:[2019-03-01T00:00:00Z TO 2019-03-02T00:00:00Z]";
+            "datetime:[2019-03-01T00:00:00Z TO 2019-03-01T00:01:00Z]";
     private static final String SEARCH_DUP_IN_THIS_RANGE =
             "datetime:[2019-02-01T00:00:00Z TO 2019-02-28T00:00:00Z]";
 
@@ -125,8 +125,7 @@ public class App {
                     analysedData.setD102((int) (long) longs[1]);
                     analysedData.setD103((int) (long) longs[2]);
                     analysedData.setD104((int) (long) longs[3]);
-                    analysisDao.set(analysedData, DB);
+//                    analysisDao.set(analysedData, DB);
                 });
-
     }
 }
