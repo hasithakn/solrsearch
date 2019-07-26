@@ -23,7 +23,7 @@ public class SearchDuplicates {
             SearchLogics searchLogics
     ) {
         Date tempDate = (Date) a.getFieldValue("datetime");
-        String timeTemp = timestampToISO(tempDate);
+        String timeTemp = TimeFunctions.timestampToISO(tempDate);
         String id = a.getFieldValue("id").toString();
 
         StringBuffer temp = new StringBuffer();
@@ -41,22 +41,7 @@ public class SearchDuplicates {
 
     }
 
-    private String timestampToISO(Date date) {
-        try {
-            String pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String isoTS = sdf.format(date);
-            return isoTS;
-        } catch (Exception e) {
-            if (date != null) {
-                return date.toString();
-            } else {
-                return "";
-            }
 
-        }
-    }
 
     public DocCountsResultsPair searchForDuplicates(
             SolrDocument a,

@@ -112,36 +112,26 @@ public class App {
                 .filter(csvSolr -> appids.contains(csvSolr.getFieldValue("app_id").toString()))
                 .collect(Collectors.toList());
 
-        filteredList.stream().parallel()
+        filteredList.stream()
                 .forEach(a -> {
-                    SolrDocumentList solrDocuments = searchDuplicates.searchWithinTimePeriod(
+                    DocCountsResultsPair res = searchDuplicates.searchForDuplicates(
                             a,
-                            "-1MONTHS",
-                            "-3DAY",
+                            SEARCH_DUP_IN_THIS_RANGE,
                             CORE,
-                            searchLogics);
+                            searchLogics
+                    );
 
-                    solrDocuments.stream()
-                            .map(e -> e.getFieldValue("id"))
-                            .forEach(e -> System.out.println(e));
-//                    DocCountsResultsPair res = searchDuplicates.searchForDuplicates(
-//                            a,
-//                            SEARCH_DUP_IN_THIS_RANGE,
-//                            CORE,
-//                            searchLogics
-//                    );
-//
-//                    long[] longs = res.getLongs();
-//                    AnalysedData analysedData = new AnalysedData();
-//                    analysedData.setApp_id(a.getFieldValue("app_id").toString());
-//                    analysedData.setDoc_id(a.getFieldValue("id").toString());
-//                    analysedData.setD101((int) longs[0]);
-//                    analysedData.setD102((int) longs[1]);
-//                    analysedData.setD103((int) longs[2]);
-//                    analysedData.setD104((int) longs[3]);
-//                    Arrays.stream(longs).forEach(e-> System.out.print(e+" "));
-//                    System.out.println();
-//                    System.out.println(res.getSolrDocuments().getNumFound());
+                    long[] longs = res.getLongs();
+                    AnalysedData analysedData = new AnalysedData();
+                    analysedData.setApp_id(a.getFieldValue("app_id").toString());
+                    analysedData.setDoc_id(a.getFieldValue("id").toString());
+                    analysedData.setD101((int) longs[0]);
+                    analysedData.setD102((int) longs[1]);
+                    analysedData.setD103((int) longs[2]);
+                    analysedData.setD104((int) longs[3]);
+                    Arrays.stream(longs).forEach(e -> System.out.print(e + " "));
+                    System.out.println();
+                    System.out.println(res.getSolrDocuments().getNumFound());
 //                    analysisDao.set(analysedData, DB);
                 });
     }
