@@ -109,6 +109,10 @@ public class CSVDataDao {
         this.client.add(core, doc, 100000);
     }
 
+    public void indexSolrDoc(SolrInputDocument doc , String core) throws IOException, SolrServerException {
+        this.client.add(core, doc, 100000);
+    }
+
     public void commitdata(String core) throws IOException, SolrServerException {
         this.client.commit(core);
     }

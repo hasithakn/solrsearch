@@ -1,10 +1,9 @@
 package com.hSenid.solrsearch.Functions;
 
-import com.hSenid.solrsearch.Entity.DocCountResultsPair;
+import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 import java.io.IOException;
 
@@ -17,27 +16,24 @@ public class SearchDuplicatesAdvance {
         this.searchLogics = searchLogics;
     }
 
-    public SolrDocumentList searchWithinTimePeriod(
+    public DocCountsResultsPair searchWithinTimePeriod(
             SolrDocument a,
             String timeFilter1,
             String timeFilter2,
             String CORE
     ) {
-        String id = a.getFieldValue("id").toString();
         String datetime = TimeFunctions.addTimeFilter(a, timeFilter1, timeFilter2);
-        SolrDocumentList solrDocuments = searchForDuplicates(a, datetime, CORE);
-        return solrDocuments;
-
+        return searchForDuplicatesWithLongArray(a, datetime, CORE);
     }
 
-    public SolrDocumentList searchForDuplicates(SolrDocument a, String datetime, String core) {
+    public QueryResponse searchForDuplicates(SolrDocument a, String datetime, String core) {
 
-        SolrDocumentList solrDocuments = searchD101(a, datetime, core);
-        if (solrDocuments == null | solrDocuments.size() == 0) {
+        QueryResponse solrDocuments = searchD101(a, datetime, core);
+        if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
             solrDocuments = searchD102(a, datetime, core);
-            if (solrDocuments == null | solrDocuments.size() == 0) {
+            if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
                 solrDocuments = searchD103(a, datetime, core);
-                if (solrDocuments == null | solrDocuments.size() == 0) {
+                if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
                     solrDocuments = searchD104(a, datetime, core);
                 }
             }
@@ -45,12 +41,38 @@ public class SearchDuplicatesAdvance {
         return solrDocuments;
     }
 
+    public DocCountsResultsPair searchForDuplicatesWithLongArray(SolrDocument a, String datetime, String core) {
 
-    public SolrDocumentList searchD101(SolrDocument a, String datetime, String core) {
+        DocCountsResultsPair docCountsResultsPair = new DocCountsResultsPair();
+        long[] longs = new long[4];
+        QueryResponse solrDocuments = searchD101(a, datetime, core);
+        longs[0] = solrDocuments.getResults().getNumFound();
+        longs[1] = -1;
+        longs[2] = -1;
+        longs[3] = -1;
+        if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
+            solrDocuments = searchD102(a, datetime, core);
+            longs[1] = solrDocuments.getResults().getNumFound();
+            if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
+                solrDocuments = searchD103(a, datetime, core);
+                longs[2] = solrDocuments.getResults().getNumFound();
+                if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
+                    solrDocuments = searchD104(a, datetime, core);
+                    longs[3] = solrDocuments.getResults().getNumFound();
+                }
+            }
+        }
+        docCountsResultsPair.setLongs(longs);
+        docCountsResultsPair.setSolrDocuments(solrDocuments.getResults());
+        return docCountsResultsPair;
+    }
+
+
+    public QueryResponse searchD101(SolrDocument a, String datetime, String core) {
         datetime = datetimeAndAppIdFilter(a, datetime);
         String q = queryFromSolrDoc(a);
         try {
-            return searchLogics.searchDateRangeGetAll(q, datetime, "sms", core).getResults();
+            return searchLogics.searchDateRangeGetAll(q, datetime, "sms", core);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SolrServerException e) {
@@ -59,11 +81,11 @@ public class SearchDuplicatesAdvance {
         return null;
     }
 
-    public SolrDocumentList searchD102(SolrDocument a, String datetime, String core) {
+    public QueryResponse searchD102(SolrDocument a, String datetime, String core) {
         datetime = datetimeAndAppIdFilter(a, datetime);
         String q = queryFromSolrDoc(a);
         try {
-            return searchLogics.searchDateRangeGetAll(q, datetime, "smsNoPunctuations", core).getResults();
+            return searchLogics.searchDateRangeGetAll(q, datetime, "smsNoPunctuations", core);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SolrServerException e) {
@@ -72,13 +94,13 @@ public class SearchDuplicatesAdvance {
         return null;
     }
 
-    public SolrDocumentList searchD103(SolrDocument a, String datetime, String core) {
+    public QueryResponse searchD103(SolrDocument a, String datetime, String core) {
 
         String q = queryFromSolrDocD103(a);
         datetime = datetimeAndAppIdFilter(a, datetime);
-        int mm = a.getFieldValue("sms").toString().split(" ").length;
+        String mm = "100%";
         try {
-            return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core).getResults();
+            return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SolrServerException e) {
@@ -88,16 +110,24 @@ public class SearchDuplicatesAdvance {
         return null;
     }
 
-    public SolrDocumentList searchD104(SolrDocument a, String datetime, String core) {
-
-
-
+    public QueryResponse searchD104(SolrDocument a, String datetime, String core) {
+        String q = queryFromSolrDocD103(a);
+        datetime = datetimeAndAppIdFilter(a, datetime);
+        String mm = "-1";
+        try {
+            return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     private String datetimeAndAppIdFilter(SolrDocument a, String datetime) {
         String appId = a.getFieldValue("app_id").toString();
-        datetime = datetime + " AND app_id:" + appId;
+        String timestamp = a.getFieldValue("timestamp").toString();
+        datetime = datetime + " AND app_id:" + appId + " AND NOT timestamp:" + timestamp;
         return datetime;
     }
 

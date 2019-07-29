@@ -1,8 +1,11 @@
 package com.hSenid.solrsearch;
 
 import com.hSenid.solrsearch.Dao.AnalysisDao;
+import com.hSenid.solrsearch.Entity.AnalysedData;
+import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
 import com.hSenid.solrsearch.FileIO.FileIO;
 import com.hSenid.solrsearch.Functions.SearchDuplicates;
+import com.hSenid.solrsearch.Functions.SearchDuplicatesAdvance;
 import com.hSenid.solrsearch.Functions.SearchLogics;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -12,28 +15,29 @@ import org.apache.solr.common.SolrDocumentList;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ModifiedApp {
 
-
+    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    private static ArrayList<String> appids = new ArrayList<>();
     private static SearchLogics searchLogics = new SearchLogics();
+    private static SearchDuplicatesAdvance searchDuplicatesAdvance = new SearchDuplicatesAdvance(searchLogics);
     private static SearchDuplicates searchDuplicates = new SearchDuplicates();
+
     private static AnalysisDao analysisDao = new AnalysisDao();
     private static final String CORE = "experiment2";
     private static final String DB = "rerun7d1m";
+
+
     private static final String DATE_RANGE_TO_SEARCH =
-            "datetime: [2019-03-02T09:21:32Z TO 2019-03-02T09:21:32Z]";
+            "datetime: [2019-03-01T00:00:00Z TO 2019-03-01T01:00:00Z]";
     private static final String SEARCH_DUP_IN_THIS_RANGE =
             "datetime:[2019-02-01T00:00:00Z TO 2019-02-28T00:00:00Z]";
 
-    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
-    private static ArrayList<String> appids = new ArrayList<>();
-
-
     public static void main(String[] args) {
-
         try {
             appids = FileIO.getAppids(APP_ID_PATH);
         } catch (FileNotFoundException e) {
@@ -110,16 +114,26 @@ public class ModifiedApp {
 
         filteredList.stream()
                 .forEach(a -> {
-                    SolrDocumentList solrDocuments = searchDuplicates.searchWithinTimePeriod(
+
+                    DocCountsResultsPair docCountsResultsPair = searchDuplicatesAdvance.searchWithinTimePeriod(
                             a,
                             "-1MONTHS",
-                            "-3DAY",
-                            CORE,
-                            searchLogics);
+                            "",
+                            CORE);
+//
+////                    DocCountsResultsPair docCountsResultsPair2 = searchDuplicatesAdvance.searchForDuplicatesWithLongArray(
+////                            a,
+////                            SEARCH_DUP_IN_THIS_RANGE,
+////                            CORE);
+//
+                    Arrays.stream(docCountsResultsPair.getLongs()).forEach(e-> System.out.print(e+" , "));
+                    System.out.println();
+//                    docCountsResultsPair.getSolrDocuments().stream()
+//                            .map(e -> e.getFieldValue("sms"))
+//                            .forEach(e -> System.out.println(e));
 
-                    solrDocuments.stream()
-                            .map(e -> e.getFieldValue("id"))
-                            .forEach(e -> System.out.println(e));
+                    //fsdfsdfdsf
+
 //                    DocCountsResultsPair res = searchDuplicates.searchForDuplicates(
 //                            a,
 //                            SEARCH_DUP_IN_THIS_RANGE,

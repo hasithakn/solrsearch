@@ -225,7 +225,7 @@ public class SearchDuplicates {
                     "smsEN",
                     0,
                     1,
-                    length,
+                    Integer.toString(length),
                     core);
             numFoundD103 = searchDocs.getResults().getNumFound();
             resultsPairD103.setDocCount(numFoundD103);
@@ -246,7 +246,7 @@ public class SearchDuplicates {
                         "smsEN",
                         0,
                         1,
-                        totTerms,
+                        Integer.toString(totTerms),
                         core);
 
                 numFoundD104 = searchDocs.getResults().getNumFound();
