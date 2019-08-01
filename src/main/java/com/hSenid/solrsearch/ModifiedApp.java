@@ -7,6 +7,7 @@ import com.hSenid.solrsearch.FileIO.FileIO;
 import com.hSenid.solrsearch.Functions.SearchDuplicates;
 import com.hSenid.solrsearch.Functions.SearchDuplicatesAdvance;
 import com.hSenid.solrsearch.Functions.SearchLogics;
+import com.hSenid.solrsearch.Functions.TimeFunctions;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -28,12 +29,13 @@ public class ModifiedApp {
     private static SearchDuplicates searchDuplicates = new SearchDuplicates();
 
     private static AnalysisDao analysisDao = new AnalysisDao();
-    private static final String CORE = "experiment2";
-    private static final String DB = "rerun7d1m";
+    private static final String CORE = "experiment3";
+    private static final String DB = "1d1m";
 
 
     private static final String DATE_RANGE_TO_SEARCH =
-            "datetime: [2019-03-01T00:00:00Z TO 2019-03-01T01:00:00Z]";
+            "datetime: [2019-03-01T00:00:00Z TO 2019-03-02T00:00:00Z]";
+
     private static final String SEARCH_DUP_IN_THIS_RANGE =
             "datetime:[2019-02-01T00:00:00Z TO 2019-02-28T00:00:00Z]";
 
@@ -111,48 +113,27 @@ public class ModifiedApp {
         List<SolrDocument> filteredList = results.stream().parallel()
                 .filter(csvSolr -> appids.contains(csvSolr.getFieldValue("app_id").toString()))
                 .collect(Collectors.toList());
-
         filteredList.stream()
                 .forEach(a -> {
-
-                    DocCountsResultsPair docCountsResultsPair = searchDuplicatesAdvance.searchWithinTimePeriod(
-                            a,
-                            "-1MONTHS",
-                            "",
-                            CORE);
-//
-////                    DocCountsResultsPair docCountsResultsPair2 = searchDuplicatesAdvance.searchForDuplicatesWithLongArray(
-////                            a,
-////                            SEARCH_DUP_IN_THIS_RANGE,
-////                            CORE);
-//
-                    Arrays.stream(docCountsResultsPair.getLongs()).forEach(e-> System.out.print(e+" , "));
-                    System.out.println();
-//                    docCountsResultsPair.getSolrDocuments().stream()
-//                            .map(e -> e.getFieldValue("sms"))
-//                            .forEach(e -> System.out.println(e));
-
-                    //fsdfsdfdsf
-
-//                    DocCountsResultsPair res = searchDuplicates.searchForDuplicates(
-//                            a,
-//                            SEARCH_DUP_IN_THIS_RANGE,
-//                            CORE,
-//                            searchLogics
-//                    );
-//
-//                    long[] longs = res.getLongs();
-//                    AnalysedData analysedData = new AnalysedData();
-//                    analysedData.setApp_id(a.getFieldValue("app_id").toString());
-//                    analysedData.setDoc_id(a.getFieldValue("id").toString());
-//                    analysedData.setD101((int) longs[0]);
-//                    analysedData.setD102((int) longs[1]);
-//                    analysedData.setD103((int) longs[2]);
-//                    analysedData.setD104((int) longs[3]);
-//                    Arrays.stream(longs).forEach(e-> System.out.print(e+" "));
-//                    System.out.println();
-//                    System.out.println(res.getSolrDocuments().getNumFound());
-//                    analysisDao.set(analysedData, DB);
+                    try {
+                        DocCountsResultsPair docCountsResultsPair = searchDuplicatesAdvance.searchWithinTimePeriod(
+                                a,
+                                "-1MONTHS",
+                                "",
+                                CORE);
+                        AnalysedData analysedData = new AnalysedData();
+                        long[] longs = docCountsResultsPair.getLongs();
+                        analysedData.setApp_id(a.getFieldValue("app_id").toString());
+                        analysedData.setDoc_id(a.getFieldValue("timestamp").toString());
+                        analysedData.setD101((int) longs[0]);
+                        analysedData.setD102((int) longs[1]);
+                        analysedData.setD103((int) longs[2]);
+                        analysedData.setD104((int) longs[3]);
+                        System.out.println(analysedData.getDoc_id() + " : " + longs[0] + "," + longs[1] + "," + longs[2] + "," + longs[3]);
+                        analysisDao.set(analysedData, DB);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
     }
 }

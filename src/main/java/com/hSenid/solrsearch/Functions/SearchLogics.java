@@ -18,7 +18,7 @@ public class SearchLogics {
     ) throws IOException, SolrServerException {
 
         int start = 0;
-        final int batch = 1;
+        final int batch = 100;
 
         QueryResponse reader = searchDateRange(q, dateRangeAS_fq, df, 0, batch, core);
 
@@ -49,7 +49,7 @@ public class SearchLogics {
     ) throws IOException, SolrServerException {
 
         int start = 0;
-        final int batch = 1;
+        final int batch = 100;
         QueryResponse reader = searchDateRangeDismax(q, dateRangeAS_fq, df, 0, batch, mm, core);
 //        int noOfDocs = (int) reader.getResults().getNumFound();
 //        int noOfTimes = (noOfDocs / batch);

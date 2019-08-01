@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public class SearchDuplicatesAdvance {
 
-
     public SearchLogics searchLogics;
 
     public SearchDuplicatesAdvance(SearchLogics searchLogics) {
@@ -73,9 +72,7 @@ public class SearchDuplicatesAdvance {
         String q = queryFromSolrDoc(a);
         try {
             return searchLogics.searchDateRangeGetAll(q, datetime, "sms", core);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
         return null;
@@ -86,9 +83,7 @@ public class SearchDuplicatesAdvance {
         String q = queryFromSolrDoc(a);
         try {
             return searchLogics.searchDateRangeGetAll(q, datetime, "smsNoPunctuations", core);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
         return null;
@@ -101,9 +96,7 @@ public class SearchDuplicatesAdvance {
         String mm = "100%";
         try {
             return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
 
@@ -116,9 +109,7 @@ public class SearchDuplicatesAdvance {
         String mm = "-1";
         try {
             return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
         return null;
