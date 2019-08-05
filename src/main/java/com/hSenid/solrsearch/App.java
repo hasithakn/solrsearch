@@ -16,12 +16,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Hello world!
  */
 public class App {
+
+    private final static Logger LOGGER = Logger.getLogger(App.class.getName());
 
     private static SearchLogics searchLogics = new SearchLogics();
     private static SearchDuplicates searchDuplicates = new SearchDuplicates();
@@ -42,7 +46,7 @@ public class App {
         try {
             appids = FileIO.getAppids(APP_ID_PATH);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
 
         int start = 0;
@@ -96,11 +100,11 @@ public class App {
                     batch,
                     CORE);
 
-            System.out.println("executed for " + batch + " from " + start);
+            LOGGER.log(Level.INFO, "executed for " + batch + " from " + start);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         } catch (SolrServerException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
 
         return csv_core2.getResults();
@@ -130,8 +134,7 @@ public class App {
                     analysedData.setD103((int) longs[2]);
                     analysedData.setD104((int) longs[3]);
                     Arrays.stream(longs).forEach(e -> System.out.print(e + " "));
-                    System.out.println();
-                    System.out.println(res.getSolrDocuments().getNumFound());
+                    LOGGER.log(Level.INFO, Long.toString(res.getSolrDocuments().getNumFound()));
 //                    analysisDao.set(analysedData, DB);
                 });
     }

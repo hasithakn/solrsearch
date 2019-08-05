@@ -18,9 +18,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ModifiedApp {
+
+    private final static Logger LOGGER = Logger.getLogger(ModifiedApp.class.getName());
 
     public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
     private static ArrayList<String> appids = new ArrayList<>();
@@ -43,7 +47,7 @@ public class ModifiedApp {
         try {
             appids = FileIO.getAppids(APP_ID_PATH);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
 
         int start = 0;
@@ -97,12 +101,9 @@ public class ModifiedApp {
                     start,
                     batch,
                     CORE);
-
-            System.out.println("executed for " + batch + " from " + start);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.INFO, "executed for " + batch + " from " + start);
+        } catch (IOException | SolrServerException e) {
+            LOGGER.log(Level.WARNING, e.toString());
         }
 
         return csv_core2.getResults();
@@ -129,10 +130,10 @@ public class ModifiedApp {
                         analysedData.setD102((int) longs[1]);
                         analysedData.setD103((int) longs[2]);
                         analysedData.setD104((int) longs[3]);
-                        System.out.println(analysedData.getDoc_id() + " : " + longs[0] + "," + longs[1] + "," + longs[2] + "," + longs[3]);
+                        LOGGER.log(Level.INFO, analysedData.getDoc_id() + " : " + longs[0] + "," + longs[1] + "," + longs[2] + "," + longs[3]);
                         analysisDao.set(analysedData, DB);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.log(Level.WARNING, e.toString());
                     }
                 });
     }

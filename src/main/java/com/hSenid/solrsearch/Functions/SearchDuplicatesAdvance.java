@@ -125,18 +125,12 @@ public class SearchDuplicatesAdvance {
     }
 
     private String queryFromSolrDoc(SolrDocument a) {
-        String sms = a.getFieldValue("sms").toString();
-        sms = sms.replaceAll("\"", "\\\\\"");
+        String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
         return "\"" + sms + "\"";
     }
 
     private String queryFromSolrDocD103(SolrDocument a) {
-//        String sms = a.getFieldValue("sms").toString();
         String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
-        System.out.println(sms);
-
-//        sms = sms.replaceAll(":", " ");
-//        sms = sms.replaceAll("\"", " ");
         return "( " + sms + " )";
     }
 

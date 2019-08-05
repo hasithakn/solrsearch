@@ -1,5 +1,6 @@
 package com.hSenid.solrsearch.Functions;
 
+import com.hSenid.solrsearch.App;
 import com.hSenid.solrsearch.Entity.DocCountResultsPair;
 import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -12,8 +13,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SearchDuplicates {
+
+    private final static Logger LOGGER = Logger.getLogger(SearchDuplicates.class.getName());
 
     public SolrDocumentList searchWithinTimePeriod(
             SolrDocument a,
@@ -24,7 +29,6 @@ public class SearchDuplicates {
     ) {
         Date tempDate = (Date) a.getFieldValue("datetime");
         String timeTemp = TimeFunctions.timestampToISO(tempDate);
-        String id = a.getFieldValue("id").toString();
 
         StringBuffer temp = new StringBuffer();
         temp.append("datetime: [");
@@ -33,14 +37,10 @@ public class SearchDuplicates {
         temp.append(" TO ");
         temp.append(timeTemp + timeFilter2 + " ]");
 
-
-        System.out.println(temp.toString());
-
-        SolrDocumentList solrDocuments = searchForDuplicates(a, temp.toString(), CORE, searchLogics).getSolrDocuments();
-        return solrDocuments;
+        LOGGER.log(Level.INFO, temp.toString());
+        return searchForDuplicates(a, temp.toString(), CORE, searchLogics).getSolrDocuments();
 
     }
-
 
 
     public DocCountsResultsPair searchForDuplicates(
@@ -180,14 +180,8 @@ public class SearchDuplicates {
                 resultsPair.setSolrDocuments(searchDocs.getResults());
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (HttpSolrClient.RemoteSolrException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException | SolrServerException | HttpSolrClient.RemoteSolrException e) {
+            LOGGER.log(Level.WARNING, e.toString());
         }
         return resultsPair;
     }
@@ -237,7 +231,7 @@ public class SearchDuplicates {
                 try {
                     totTerms = getTotTerms(length, parsedquery_toString);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, e.toString());
                 }
 
                 long numFoundD104 = -1;
@@ -256,14 +250,8 @@ public class SearchDuplicates {
                 resultsPairD104.setDocCount(-1);
                 resultsPairD104.setSolrDocuments(null);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (HttpSolrClient.RemoteSolrException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException | SolrServerException | HttpSolrClient.RemoteSolrException e) {
+            LOGGER.log(Level.WARNING, e.toString());
         }
 
         docCountResultsPairs[0] = resultsPairD103;

@@ -20,9 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class SolrSearch {
+    private final static Logger LOGGER = Logger.getLogger(SolrSearch.class.getName());
+
     public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
     private static ArrayList<String> appids = new ArrayList<>();
     private static SearchLogics searchLogics = new SearchLogics();
@@ -105,7 +109,7 @@ public class SolrSearch {
                     batch,
                     CORE);
 
-            System.out.println("executed for " + batch + " from " + start);
+            LOGGER.log(Level.INFO, "executed for " + batch + " from " + start);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SolrServerException e) {
@@ -161,10 +165,11 @@ public class SolrSearch {
                         dd.setD7(d7);
                         dd.setD30(d30);
                         dd.setDetails(details.toString());
-                        ddDao.set(dd, DB);
-                        System.out.println(dd.getTimestamp()+" -- "+d1 + " : " + d7 + " : " + d30);
+//                        ddDao.set(dd, DB);
+
+                        LOGGER.log(Level.INFO, dd.getTimestamp() + " -- " + d1 + " : " + d7 + " : " + d30);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.log(Level.WARNING, e.toString());
                     }
                 });
     }
