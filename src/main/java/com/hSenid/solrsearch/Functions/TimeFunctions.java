@@ -38,4 +38,23 @@ public class TimeFunctions {
         String timeTemp = timestampToISO((Date) entrie.getFieldValue("datetime"));
         return getFilterDate(timeFilter1, timeFilter2, timeTemp);
     }
+
+    public static String addTimeFilterDateXTillDocTime(SolrDocument entrie, String x) {
+        String timeTemp = timestampToISO((Date) entrie.getFieldValue("datetime"));
+        StringBuffer temp = new StringBuffer();
+        temp.append("datetime: [");
+        temp.append(x);
+        temp.append(" TO ");
+        temp.append(timeTemp + " ]");
+        return temp.toString();
+    }
+
+    public static String getDateTimeWithXY(String x, String y) {
+        StringBuffer temp = new StringBuffer();
+        temp.append("datetime: [");
+        temp.append(x);
+        temp.append(" TO ");
+        temp.append(y + " ]");
+        return temp.toString();
+    }
 }

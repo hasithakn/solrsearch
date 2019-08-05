@@ -1,8 +1,10 @@
 package com.hSenid.solrsearch.Functions;
 
 import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
+import com.sun.security.ntlm.Client;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 
 import java.io.IOException;
@@ -129,11 +131,15 @@ public class SearchDuplicatesAdvance {
     }
 
     private String queryFromSolrDocD103(SolrDocument a) {
-        String sms = a.getFieldValue("sms").toString();
-        sms = sms.replaceAll(":", " ");
-        sms = sms.replaceAll("\"", " ");
+//        String sms = a.getFieldValue("sms").toString();
+        String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
+        System.out.println(sms);
+
+//        sms = sms.replaceAll(":", " ");
+//        sms = sms.replaceAll("\"", " ");
         return "( " + sms + " )";
     }
+
 
 
 }
