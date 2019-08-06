@@ -1,4 +1,4 @@
-package com.hSenid.solrsearch;
+package com.hSenid.solrsearch.Research;
 
 import com.hSenid.solrsearch.Dao.AnalysisDao;
 import com.hSenid.solrsearch.Entity.AnalysedData;

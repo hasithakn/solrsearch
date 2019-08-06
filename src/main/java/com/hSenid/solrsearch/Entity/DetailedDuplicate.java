@@ -1,6 +1,6 @@
 package com.hSenid.solrsearch.Entity;
 
-public class DetailedDuplicateCat4 {
+public class DetailedDuplicate {
     private String app_id;
     private String timestamp;
     private int D1;

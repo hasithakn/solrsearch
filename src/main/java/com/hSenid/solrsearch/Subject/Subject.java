@@ -1,28 +1,30 @@
 package com.hSenid.solrsearch.Subject;
 
+import com.hSenid.solrsearch.Entity.DetailedDuplicate;
 import com.hSenid.solrsearch.Observer.Observer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Subject {
     private ArrayList<Observer> observers = new ArrayList<>();
-    private ArrayList<String> DBRows = new ArrayList<>();
+    private List<DetailedDuplicate> dbRows = new ArrayList<>();
 
-    public ArrayList<String> getDBRows() {
-        return DBRows;
+    public List<DetailedDuplicate> getDBRows() {
+        return dbRows;
     }
 
-    public void setDBRows(ArrayList<String> _DBRows) {
-        this.DBRows = _DBRows;
+    public void setDBRows(List<DetailedDuplicate> dbRows) {
+        this.dbRows = dbRows;
         notifyAllObservers();
     }
 
-    public void attach(Observer _o) {
-        observers.add(_o);
+    public void attach(Observer o) {
+        observers.add(o);
     }
 
     public void notifyAllObservers() {
-        observers.stream().forEach(observer -> observer.update());
+        observers.forEach(Observer::update);
     }
 
 }

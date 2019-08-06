@@ -17,58 +17,6 @@ public class SearchDuplicatesAdvance {
         this.searchLogics = searchLogics;
     }
 
-    public DocCountsResultsPair searchWithinTimePeriod(
-            SolrDocument a,
-            String timeFilter1,
-            String timeFilter2,
-            String CORE
-    ) {
-        String datetime = TimeFunctions.addTimeFilter(a, timeFilter1, timeFilter2);
-        return searchForDuplicatesWithLongArray(a, datetime, CORE);
-    }
-
-    public QueryResponse searchForDuplicates(SolrDocument a, String datetime, String core) {
-
-        QueryResponse solrDocuments = searchD101(a, datetime, core);
-        if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-            solrDocuments = searchD102(a, datetime, core);
-            if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-                solrDocuments = searchD103(a, datetime, core);
-                if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-                    solrDocuments = searchD104(a, datetime, core);
-                }
-            }
-        }
-        return solrDocuments;
-    }
-
-    public DocCountsResultsPair searchForDuplicatesWithLongArray(SolrDocument a, String datetime, String core) {
-
-        DocCountsResultsPair docCountsResultsPair = new DocCountsResultsPair();
-        long[] longs = new long[4];
-        QueryResponse solrDocuments = searchD101(a, datetime, core);
-        longs[0] = solrDocuments.getResults().getNumFound();
-        longs[1] = -1;
-        longs[2] = -1;
-        longs[3] = -1;
-        if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-            solrDocuments = searchD102(a, datetime, core);
-            longs[1] = solrDocuments.getResults().getNumFound();
-            if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-                solrDocuments = searchD103(a, datetime, core);
-                longs[2] = solrDocuments.getResults().getNumFound();
-                if (solrDocuments == null | solrDocuments.getResults().size() == 0) {
-                    solrDocuments = searchD104(a, datetime, core);
-                    longs[3] = solrDocuments.getResults().getNumFound();
-                }
-            }
-        }
-        docCountsResultsPair.setLongs(longs);
-        docCountsResultsPair.setSolrDocuments(solrDocuments.getResults());
-        return docCountsResultsPair;
-    }
-
-
     public QueryResponse searchD101(SolrDocument a, String datetime, String core) {
         datetime = datetimeAndAppIdFilter(a, datetime);
         String q = queryFromSolrDoc(a);
@@ -92,7 +40,6 @@ public class SearchDuplicatesAdvance {
     }
 
     public QueryResponse searchD103(SolrDocument a, String datetime, String core) {
-
         String q = queryFromSolrDocD103(a);
         datetime = datetimeAndAppIdFilter(a, datetime);
         String mm = "100%";
@@ -133,7 +80,6 @@ public class SearchDuplicatesAdvance {
         String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
         return "( " + sms + " )";
     }
-
 
 
 }

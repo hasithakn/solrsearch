@@ -1,17 +1,16 @@
 package com.hSenid.solrsearch.Dao;
 
 import com.hSenid.solrsearch.DbConnection.MYSQLConnecter;
-import com.hSenid.solrsearch.Entity.AnalysedData;
-import com.hSenid.solrsearch.Entity.DetailedDuplicateCat4;
+import com.hSenid.solrsearch.Entity.DetailedDuplicate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DetailedDuplicateCat4Dao {
+public class DetailedDuplicateDao {
     public static final Connection con = MYSQLConnecter.getConnection();
 
-    public void set(DetailedDuplicateCat4 detailedDuplicateCat4, String tableName) {
+    public void set(DetailedDuplicate detailedDuplicate, String tableName) {
 
         String query = " insert into " + tableName + " ( app_id, timestamp, D1, D7, D30, Details ) "
                 + " values (?, ?, ?, ?, ?, ?)";
@@ -21,12 +20,12 @@ public class DetailedDuplicateCat4Dao {
         try {
 
             preparedStmt = con.prepareStatement(query);
-            preparedStmt.setString(1, detailedDuplicateCat4.getApp_id());
-            preparedStmt.setString(2, detailedDuplicateCat4.getTimestamp());
-            preparedStmt.setInt(3, detailedDuplicateCat4.getD1());
-            preparedStmt.setInt(4, detailedDuplicateCat4.getD7());
-            preparedStmt.setInt(5, detailedDuplicateCat4.getD30());
-            preparedStmt.setString(6, detailedDuplicateCat4.getDetails());
+            preparedStmt.setString(1, detailedDuplicate.getApp_id());
+            preparedStmt.setString(2, detailedDuplicate.getTimestamp());
+            preparedStmt.setInt(3, detailedDuplicate.getD1());
+            preparedStmt.setInt(4, detailedDuplicate.getD7());
+            preparedStmt.setInt(5, detailedDuplicate.getD30());
+            preparedStmt.setString(6, detailedDuplicate.getDetails());
 
             preparedStmt.execute();
 

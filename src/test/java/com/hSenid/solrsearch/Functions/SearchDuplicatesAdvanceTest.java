@@ -18,6 +18,7 @@ public class SearchDuplicatesAdvanceTest {
     CSVDataDao csvDataDao = new CSVDataDao();
     String core = "experiment3";
     SearchDuplicatesAdvance searchDuplicatesAdvance = new SearchDuplicatesAdvance(searchLogics);
+    SearchingMethods searchingMethods = new SearchingMethods(searchDuplicatesAdvance);
     private static final String D1 = "2019-03-01T00:00:00Z";
     private static final String D7 = "2019-02-23T00:00:00Z";
     private static final String D30 = "2019-01-31T00:00:00Z";
@@ -25,7 +26,7 @@ public class SearchDuplicatesAdvanceTest {
     @Test
     public void searchWithinTimePeriod() {
         SolrDocument doc = getDoc();
-        DocCountsResultsPair docCountsResultsPair = searchDuplicatesAdvance.searchWithinTimePeriod(
+        DocCountsResultsPair docCountsResultsPair = searchingMethods.searchWithinTimePeriod(
                 doc,
                 "-1MONTHS",
                 "",
@@ -39,7 +40,7 @@ public class SearchDuplicatesAdvanceTest {
     public void searchForDuplicatesWithLongArray() {
         SolrDocument doc = getDoc();
         String s = TimeFunctions.addTimeFilter(doc, "-1MONTHS", "");
-        DocCountsResultsPair docCountsResultsPair = searchDuplicatesAdvance
+        DocCountsResultsPair docCountsResultsPair = searchingMethods
                 .searchForDuplicatesWithLongArray(doc,
                         s,
                         core);
@@ -51,7 +52,7 @@ public class SearchDuplicatesAdvanceTest {
     public void searchForDuplicates() {
         SolrDocument doc = getDoc();
         String s = TimeFunctions.addTimeFilter(doc, "-24HOURS", "");
-        SolrDocumentList solrDocuments = searchDuplicatesAdvance.searchForDuplicates(doc,
+        SolrDocumentList solrDocuments = searchingMethods.searchForDuplicates(doc,
                 s,
                 core).getResults();
         long numFound = solrDocuments.getNumFound();
@@ -62,7 +63,7 @@ public class SearchDuplicatesAdvanceTest {
     public void searchD101() {
         SolrDocument doc = getDoc();
         System.out.println(doc.getFieldValue("sms"));
-        String s = TimeFunctions.addTimeFilter(doc, "-1MONTHS", "");
+        String s = TimeFunctions.addTimeFilter(doc, "-100DAYS", "");
         SolrDocumentList solrDocuments = searchDuplicatesAdvance.searchD101(doc,
                 s,
                 core).getResults();
@@ -114,7 +115,7 @@ public class SearchDuplicatesAdvanceTest {
     public SolrDocument getDoc() {
 
         try {
-            return searchLogics.searchDateRange("timestamp:1551403481296",
+            return searchLogics.searchDateRange("timestamp:1551376920328",
                     "",
                     "",
                     0,

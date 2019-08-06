@@ -1,6 +1,5 @@
 package com.hSenid.solrsearch.Functions;
 
-import com.hSenid.solrsearch.App;
 import com.hSenid.solrsearch.Entity.DocCountResultsPair;
 import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -10,9 +9,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
