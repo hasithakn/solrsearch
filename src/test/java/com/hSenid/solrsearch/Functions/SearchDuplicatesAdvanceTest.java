@@ -16,7 +16,7 @@ public class SearchDuplicatesAdvanceTest {
 
     SearchLogics searchLogics = new SearchLogics();
     CSVDataDao csvDataDao = new CSVDataDao();
-    String core = "experiment3";
+    String core = "experiment5";
     SearchDuplicatesAdvance searchDuplicatesAdvance = new SearchDuplicatesAdvance(searchLogics);
     SearchingMethods searchingMethods = new SearchingMethods(searchDuplicatesAdvance);
     private static final String D1 = "2019-03-01T00:00:00Z";
@@ -63,7 +63,7 @@ public class SearchDuplicatesAdvanceTest {
     public void searchD101() {
         SolrDocument doc = getDoc();
         System.out.println(doc.getFieldValue("sms"));
-        String s = TimeFunctions.addTimeFilter(doc, "-100DAYS", "");
+        String s = TimeFunctions.addTimeFilter(doc, "-1MONTHS", "");
         SolrDocumentList solrDocuments = searchDuplicatesAdvance.searchD101(doc,
                 s,
                 core).getResults();
@@ -101,7 +101,6 @@ public class SearchDuplicatesAdvanceTest {
     @Test
     public void searchD104() {
         SolrDocument doc = getDoc();
-//        String s = TimeFunctions.addTimeFilterDateXTillDocTime(doc, D1);
         System.out.println(doc.getFieldValue("sms"));
         String s = TimeFunctions.addTimeFilter(doc, "-1MONTHS", "");
         SolrDocumentList solrDocuments = searchDuplicatesAdvance.searchD104(doc,
@@ -115,7 +114,7 @@ public class SearchDuplicatesAdvanceTest {
     public SolrDocument getDoc() {
 
         try {
-            return searchLogics.searchDateRange("timestamp:1551376920328",
+            return searchLogics.searchDateRange("timestamp:1551412639040",
                     "",
                     "",
                     0,

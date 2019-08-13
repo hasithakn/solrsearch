@@ -27,9 +27,11 @@ import java.util.stream.Collectors;
  */
 public class SolrSearchV2 {
 
-    private final static Logger LOGGER = Logger.getLogger(SolrSearch.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SolrSearchV2.class.getName());
 
-    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    private static final Subject subject = new Subject();
+
+    private static final String APP_ID_PATH = "/home/hasithan/hsenid/analysis/AppId.csv";
     private static ArrayList<String> appIdFilter = new ArrayList<>();
 
     private static ArrayList<DetailedDuplicate> detailedDuplicates = new ArrayList<>();
@@ -49,8 +51,7 @@ public class SolrSearchV2 {
 
     public static void main(String[] args) throws InterruptedException {
 
-        Subject subject = new Subject();
-        DBObserver dbObserver = new DBObserver(subject);
+        new DBObserver(subject);
 
         try {
             appIdFilter = FileIO.getAppids(APP_ID_PATH);
@@ -83,11 +84,7 @@ public class SolrSearchV2 {
 
         for (int i = 0; i < noOfTimes + 1; i++) {
             final int temp = i;
-            ts[i] = new Thread() {
-                public void run() {
-                    processData(solrDocumentLists[temp]);
-                }
-            };
+            ts[i] = new Thread(() -> processData(solrDocumentLists[temp]));
         }
 
         for (int i = 0; i < noOfTimes + 1; i++) {
@@ -97,10 +94,7 @@ public class SolrSearchV2 {
         for (int i = 0; i < noOfTimes + 1; i++) {
             ts[i].join();
         }
-
         subject.setDBRows(detailedDuplicates);
-
-
     }
 
     private static SolrDocumentList executeQ(
@@ -133,54 +127,54 @@ public class SolrSearchV2 {
                 .filter(csvSolr -> appIdFilter.contains(csvSolr.getFieldValue("app_id").toString()))
                 .collect(Collectors.toList());
 
-        filteredList.stream()
-                .forEach(a -> {
-                    try {
-                        int d1 = 0;
-                        int d7 = 0;
-                        int d30 = 0;
-                        JSONObject details = new JSONObject();
+        filteredList.forEach(a -> {
+            try {
+                int d1 = 0;
+                int d7 = 0;
+                int d30 = 0;
+                JSONObject details = new JSONObject();
 
-                        String s = TimeFunctions.addTimeFilterDateXTillDocTime(a, D1);
-                        QueryResponse response = SM.searchForDuplicatesD101D102(a, s, CORE);
-                        List<String> d1List = response.getResults().stream()
-                                .map(e -> e.getFieldValue("timestamp").toString())
-                                .collect(Collectors.toList());
-                        d1 = (int) response.getResults().getNumFound();
-                        details.put("d1", d1List);
+                String s = TimeFunctions.addTimeFilterDateXTillDocTime(a, D1);
+                QueryResponse response = SM.searchForDuplicatesD101D102(a, s, CORE);
+                List<String> d1List = response.getResults().stream()
+                        .map(e -> e.getFieldValue("timestamp").toString())
+                        .collect(Collectors.toList());
+                d1 = (int) response.getResults().getNumFound();
+                details.put("d1", d1List);
 
-                        s = TimeFunctions.getDateTimeWithXY(D7, D1);
-                        response = SM.searchForDuplicatesD101D102(a, s, CORE);
-                        List<String> d7List = response.getResults().stream()
-                                .map(e -> e.getFieldValue("timestamp").toString())
-                                .collect(Collectors.toList());
-                        d7 = (int) response.getResults().getNumFound();
-                        details.put("d7", d7List);
+                s = TimeFunctions.getDateTimeWithXY(D7, D1);
+                response = SM.searchForDuplicatesD101D102(a, s, CORE);
+                List<String> d7List = response.getResults().stream()
+                        .map(e -> e.getFieldValue("timestamp").toString())
+                        .collect(Collectors.toList());
+                d7 = (int) response.getResults().getNumFound();
+                details.put("d7", d7List);
 
-                        s = TimeFunctions.getDateTimeWithXY(D30, D7);
-                        response = SM.searchForDuplicatesD101D102(a, s, CORE);
-                        List<String> d30List = response.getResults().stream()
-                                .map(e -> e.getFieldValue("timestamp").toString())
-                                .collect(Collectors.toList());
-                        d30 = (int) response.getResults().getNumFound();
-                        details.put("d30", d30List);
+                s = TimeFunctions.getDateTimeWithXY(D30, D7);
+                response = SM.searchForDuplicatesD101D102(a, s, CORE);
+                List<String> d30List = response.getResults().stream()
+                        .map(e -> e.getFieldValue("timestamp").toString())
+                        .collect(Collectors.toList());
+                d30 = (int) response.getResults().getNumFound();
+                details.put("d30", d30List);
 
-                        DetailedDuplicate detailedDuplicate = new DetailedDuplicate();
-                        detailedDuplicate.setApp_id(a.getFieldValue("app_id").toString());
-                        detailedDuplicate.setTimestamp(a.getFieldValue("timestamp").toString());
-                        detailedDuplicate.setD1(d1);
-                        detailedDuplicate.setD7(d7);
-                        detailedDuplicate.setD30(d30);
-                        detailedDuplicate.setDetails(details.toString());
+                DetailedDuplicate detailedDuplicate = new DetailedDuplicate();
+                detailedDuplicate.setApp_id(a.getFieldValue("app_id").toString());
+                detailedDuplicate.setTimestamp(a.getFieldValue("timestamp").toString());
+                detailedDuplicate.setD1(d1);
+                detailedDuplicate.setD7(d7);
+                detailedDuplicate.setD30(d30);
+                detailedDuplicate.setDetails(details.toString());
+                detailedDuplicates.add(detailedDuplicate);
 
-                        detailedDuplicates.add(detailedDuplicate);
-                        LOGGER.log(Level.INFO,
-                                detailedDuplicate.getTimestamp() + " -- " + d1 + " : " + d7 + " : " + d30
-                        );
-                    } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, e.toString());
-                    }
-                });
+                LOGGER.log(Level.INFO,
+                        detailedDuplicate.getTimestamp() + " -- " + d1 + " : " + d7 + " : " + d30
+                );
+
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, e.toString());
+            }
+        });
     }
 }
 

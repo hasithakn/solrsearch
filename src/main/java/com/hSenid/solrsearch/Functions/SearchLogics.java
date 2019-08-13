@@ -63,7 +63,6 @@ public class SearchLogics {
 //                }
 //            }
 //        }
-
         return reader;
     }
 

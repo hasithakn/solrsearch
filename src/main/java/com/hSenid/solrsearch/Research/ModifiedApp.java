@@ -25,7 +25,7 @@ public class ModifiedApp {
 
     private final static Logger LOGGER = Logger.getLogger(ModifiedApp.class.getName());
 
-    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    public static final String APP_ID_PATH = "/home/hasithan/hsenid/analysis/AppId.csv";
     private static ArrayList<String> appids = new ArrayList<>();
 
     private static final SearchLogics searchLogics = new SearchLogics();
@@ -33,8 +33,8 @@ public class ModifiedApp {
     private static final SearchingMethods SM = new SearchingMethods(SDA);
 
     private static AnalysisDao analysisDao = new AnalysisDao();
-    private static final String CORE = "experiment3";
-    private static final String DB = "1d1m";
+    private static final String CORE = "experiment5";
+    private static final String DB = "1d1mNew";
 
 
     private static final String DATE_RANGE_TO_SEARCH =

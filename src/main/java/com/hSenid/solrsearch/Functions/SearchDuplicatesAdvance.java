@@ -2,14 +2,21 @@ package com.hSenid.solrsearch.Functions;
 
 import com.hSenid.solrsearch.Entity.DocCountsResultsPair;
 import com.sun.security.ntlm.Client;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.schema.AnalyzerDefinition;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SearchDuplicatesAdvance {
+
+    private static final Logger LOGGER = Logger.getLogger(SearchDuplicatesAdvance.class.getName());
 
     public SearchLogics searchLogics;
 
@@ -34,32 +41,31 @@ public class SearchDuplicatesAdvance {
         try {
             return searchLogics.searchDateRangeGetAll(q, datetime, "smsNoPunctuations", core);
         } catch (IOException | SolrServerException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
         return null;
     }
 
     public QueryResponse searchD103(SolrDocument a, String datetime, String core) {
         String q = queryFromSolrDocD103(a);
-        datetime = datetimeAndAppIdFilter(a, datetime);
+        datetime = datetimeAndAppIdTermCountFilter(a, datetime);
         String mm = "100%";
         try {
             return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
         } catch (IOException | SolrServerException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
-
         return null;
     }
 
     public QueryResponse searchD104(SolrDocument a, String datetime, String core) {
         String q = queryFromSolrDocD103(a);
-        datetime = datetimeAndAppIdFilter(a, datetime);
+        datetime = datetimeAndAppIdTermCountFilter(a, datetime);
         String mm = "-1";
         try {
             return searchLogics.searchDateRangeGetAllDismax(q, datetime, "smsEN", mm, core);
         } catch (IOException | SolrServerException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString());
         }
         return null;
     }
@@ -71,15 +77,22 @@ public class SearchDuplicatesAdvance {
         return datetime;
     }
 
+    private String datetimeAndAppIdTermCountFilter(SolrDocument a, String datetime) {
+        StringBuilder temp = new StringBuilder(datetimeAndAppIdFilter(a, datetime));
+        int termCount = Integer.parseInt(a.getFieldValue("termCount").toString());
+        temp.append(" AND termCount: [ * TO " + termCount + " ] ");
+        return temp.toString();
+
+    }
+
     private String queryFromSolrDoc(SolrDocument a) {
         String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
         return "\"" + sms + "\"";
     }
 
     private String queryFromSolrDocD103(SolrDocument a) {
-        String sms = ClientUtils.escapeQueryChars(a.getFieldValue("sms").toString());
+        String sms = a.getFieldValue("sms").toString();
         return "( " + sms + " )";
     }
-
 
 }

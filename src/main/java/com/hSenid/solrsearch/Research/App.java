@@ -37,7 +37,7 @@ public class App {
     private static final String SEARCH_DUP_IN_THIS_RANGE =
             "datetime:[2019-02-01T00:00:00Z TO 2019-02-28T00:00:00Z]";
 
-    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    public static final String APP_ID_PATH = "/home/hasithan/hsenid/analysis/AppId.csv";
     private static ArrayList<String> appids = new ArrayList<>();
 
 

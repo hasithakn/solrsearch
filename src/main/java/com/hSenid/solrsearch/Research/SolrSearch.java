@@ -25,13 +25,13 @@ import java.util.stream.Collectors;
 public class SolrSearch {
     private final static Logger LOGGER = Logger.getLogger(SolrSearch.class.getName());
 
-    public static final String APP_ID_PATH = "/home/hasitha/hSenid/analysis/AppId.csv";
+    public static final String APP_ID_PATH = "/home/hasithan/hsenid/analysis/AppId.csv";
     private static ArrayList<String> appids = new ArrayList<>();
     private static SearchLogics searchLogics = new SearchLogics();
     private static SearchDuplicatesAdvance searchDuplicatesAdvance = new SearchDuplicatesAdvance(searchLogics);
 
     private static DetailedDuplicateDao ddDao = new DetailedDuplicateDao();
-    private static final String CORE = "experiment3";
+    private static final String CORE = "experiment5";
     private static final String DB = "1d1730D104";
 
     private static final String DATE_RANGE_TO_SEARCH =
@@ -161,7 +161,6 @@ public class SolrSearch {
                         dd.setD30(d30);
                         dd.setDetails(details.toString());
                         ddDao.set(dd, DB);
-
                         LOGGER.log(Level.INFO, dd.getTimestamp() + " -- " + d1 + " : " + d7 + " : " + d30);
                     } catch (Exception e) {
                         LOGGER.log(Level.WARNING, e.toString());
